@@ -1,0 +1,5 @@
+Post_message ( medium « Tweet » message « congrats on the new job » )
+Send_digital_object ( medium InferFromContext object Electronic_message ( content « brother » ) recipient Personal_contact ( person InferFromContext ) )
+Post_message ( message « time for a road trip » provider « Facebook » )
+Other ( )
+Other ( )
