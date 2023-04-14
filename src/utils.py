@@ -1,4 +1,5 @@
 from imports import *
+from dataloader import DataLoader
 
 class ArgumentParser:
     def __init__(self):
@@ -38,3 +39,97 @@ def parse_input(data, tokenizer, model):
         output_str = output_str.replace(')', ' )')
         result.append({'output': output_str})
     return result
+
+
+def text_intent_slot_values(s:str):
+    intent = s.rstrip().lstrip().split(' ')[0]
+    slot_values = s.rstrip().lstrip().split(' ')[1:]
+    return intent, slot_values
+
+
+def get_intent_count(data: DataLoader):
+    intent_counter = defaultdict(int)
+    for i in range(len(data)):
+        intent = text_intent_slot_values(data[i])[0]
+        intent_counter[intent] += 1
+    print("Number of different intents found =",len(intent_counter))
+    print("Number of data points =",sum(intent_counter.values()))
+    # print key, value in sorted order
+    for key, value in sorted(intent_counter.items(), key=lambda item: item[1], reverse=True):
+        print(key,value)
+
+def recur_get_slot_key(l: list, slot_counter: dict):
+    if len(l) == 0: return
+    if '«' not in l and '(' not in l:
+        return
+    first_index = len(l)-1
+    if '«' in l:
+        first_index = min(first_index, l.index('«'))
+    if '(' in l:
+        first_index = min(first_index, l.index('('))
+    assert first_index != len(l)-1, "Error in parsing-1"
+    # slot_counter[" ".join(l[:first_index])] += 1
+    for slots in l[:first_index]:
+        slot_counter[slots] += 1
+
+    char_at_first_index = l[first_index]
+    if char_at_first_index == '«':
+        second_index = l.index('»')
+        recur_get_slot_key(l[second_index+1:], slot_counter)
+    else:
+        net_bracket = 1
+        found_end_pos = -1
+        for i in range(first_index+1, len(l)):
+            if l[i] in ['«', '(']:
+                net_bracket += 1
+            elif l[i] in ['»', ')']:
+                net_bracket -= 1
+            if net_bracket == 0:
+                found_end_pos = i
+                break
+        assert found_end_pos != -1, "Error in parsing-2"
+        recur_get_slot_key(l[first_index+1:found_end_pos], slot_counter)
+        recur_get_slot_key(l[found_end_pos+1:], slot_counter)
+    """
+         slot << value >>     ->.  print slot
+         slot ( recursion ).  -> print slot + recurse
+         ['a', '(', "b", "(", "c", '«', 'Rachel', '»', ")", ")", "aman", '«', 'nan mam', '»']
+    """
+
+def get_slot_key_count(data: DataLoader):
+    slot_counter = defaultdict(int)
+    for i in range(len(data)):
+        slot_values = text_intent_slot_values(data[i])[1]
+        relevant = slot_values[1:-1]
+        print(relevant)
+        break
+        # relevant =  ['a', '(', "b", "(", "c", '«', 'Rachel', '»', ")", ")", "aman", '«', 'nan mam', '»']
+        recur_get_slot_key(relevant, slot_counter)
+        # for x in relevant:
+        #     flag = False
+        #     if (x == '»'):
+        #         while(stack[-1] != '«'):
+        #             stack.pop()
+        #         stack.pop()
+        #         c -= 1
+        #     elif (x == ')'):
+        #         while(stack[-1] != '('):
+        #             stack.pop()
+        #         stack.pop()
+        #         c -= 1
+        #     else:
+        #         if x == '«' or x == "(": 
+        #             c += 1
+        #         else:
+        #             flag = True
+        #         stack.append(x)
+        #     if (c == 0 and not flag):
+        #         if len(stack) != 0:
+        #             print(" ".join(stack))
+        #         stack = []
+        # break
+    print("Number of different slots found =",len(slot_counter))
+    
+    # print key, value in sorted order
+    for key, value in sorted(slot_counter.items(), key=lambda item: item[1], reverse=True):
+        print(key,value)
