@@ -1,0 +1,100 @@
+
+ Epoch 0 / 50 -> Training Loss 3.219186910288745 || Accuracy:0.1992018981880932
+
+ Epoch 1 / 50 -> Training Loss 2.530930907856692 || Accuracy:0.32301553062985333
+
+ Epoch 2 / 50 -> Training Loss 2.0677765447903957 || Accuracy:0.48490077653149266
+
+ Epoch 3 / 50 -> Training Loss 1.8135550797170161 || Accuracy:0.5033433994823123
+
+ Epoch 4 / 50 -> Training Loss 1.6406683109862148 || Accuracy:0.5560828300258844
+
+ Epoch 5 / 50 -> Training Loss 1.5181167682996106 || Accuracy:0.5477782571182054
+
+ Epoch 6 / 50 -> Training Loss 1.4374146397514855 || Accuracy:0.5739861949956859
+
+ Epoch 7 / 50 -> Training Loss 1.3690571739454633 || Accuracy:0.6649050905953409
+
+ Epoch 8 / 50 -> Training Loss 1.3153992646495871 || Accuracy:0.6322260569456428
+
+ Epoch 9 / 50 -> Training Loss 1.272477360517248 || Accuracy:0.6574633304572908
+
+ Epoch 10 / 50 -> Training Loss 1.2428252337763799 || Accuracy:0.6357851596203624
+
+ Epoch 11 / 50 -> Training Loss 1.2084050601111846 || Accuracy:0.6134598792062123
+
+ Epoch 12 / 50 -> Training Loss 1.1702432362718356 || Accuracy:0.655414150129422
+
+ Epoch 13 / 50 -> Training Loss 1.1539878344511223 || Accuracy:0.6823770491803278
+
+ Epoch 14 / 50 -> Training Loss 1.1283863282486628 || Accuracy:0.6443054357204486
+
+ Epoch 15 / 50 -> Training Loss 1.112266426515776 || Accuracy:0.661130284728214
+
+ Epoch 16 / 50 -> Training Loss 1.0904548398542946 || Accuracy:0.6708369283865401
+
+ Epoch 17 / 50 -> Training Loss 1.0823090589144897 || Accuracy:0.6793572044866264
+
+ Epoch 18 / 50 -> Training Loss 1.0554146562136857 || Accuracy:0.6945642795513374
+
+ Epoch 19 / 50 -> Training Loss 1.0410835827221196 || Accuracy:0.6966134598792062
+
+ Epoch 20 / 50 -> Training Loss 1.044181854055639 || Accuracy:0.693809318377912
+
+ Epoch 21 / 50 -> Training Loss 1.0397310573434682 || Accuracy:0.7008196721311475
+
+ Epoch 22 / 50 -> Training Loss 1.0220729077563566 || Accuracy:0.658541846419327
+
+ Epoch 23 / 50 -> Training Loss 1.0004144202383434 || Accuracy:0.7181837791199309
+
+ Epoch 24 / 50 -> Training Loss 1.00121750671059 || Accuracy:0.6961820534943917
+
+ Epoch 25 / 50 -> Training Loss 0.9879111088773906 || Accuracy:0.6880931837791199
+
+ Epoch 26 / 50 -> Training Loss 0.9993239981963292 || Accuracy:0.7058886971527178
+
+ Epoch 27 / 50 -> Training Loss 0.962890077455371 || Accuracy:0.6997411561691113
+
+ Epoch 28 / 50 -> Training Loss 0.9558615532883427 || Accuracy:0.7002804141501294
+
+ Epoch 29 / 50 -> Training Loss 0.9639006373621485 || Accuracy:0.7327437446074202
+
+ Epoch 30 / 50 -> Training Loss 0.956124956701316 || Accuracy:0.6856125970664366
+
+ Epoch 31 / 50 -> Training Loss 0.950325807581499 || Accuracy:0.7158110440034513
+
+ Epoch 32 / 50 -> Training Loss 0.9358753478625488 || Accuracy:0.6848576358930112
+
+ Epoch 33 / 50 -> Training Loss 0.9282601181383103 || Accuracy:0.6898188093183779
+
+ Epoch 34 / 50 -> Training Loss 0.9093314879818967 || Accuracy:0.7069672131147541
+
+ Epoch 35 / 50 -> Training Loss 0.9255226024717739 || Accuracy:0.6974762726488352
+
+ Epoch 36 / 50 -> Training Loss 0.9086367095771589 || Accuracy:0.753451251078516
+
+ Epoch 37 / 50 -> Training Loss 0.9015416081598792 || Accuracy:0.7063201035375324
+
+ Epoch 38 / 50 -> Training Loss 0.8896404217209732 || Accuracy:0.7523727351164797
+
+ Epoch 39 / 50 -> Training Loss 0.8952719973798138 || Accuracy:0.6993097497842968
+
+ Epoch 40 / 50 -> Training Loss 0.8911446402747073 || Accuracy:0.7750215703192407
+
+ Epoch 41 / 50 -> Training Loss 0.8867608692008767 || Accuracy:0.7103106125970664
+
+ Epoch 42 / 50 -> Training Loss 0.8775541603073124 || Accuracy:0.7353321829163072
+
+ Epoch 43 / 50 -> Training Loss 0.8742021322250366 || Accuracy:0.739106988783434
+
+ Epoch 44 / 50 -> Training Loss 0.8849906113433149 || Accuracy:0.7564710957722174
+
+ Epoch 45 / 50 -> Training Loss 0.8708457136670872 || Accuracy:0.7732959447799828
+
+ Epoch 46 / 50 -> Training Loss 0.878978253225916 || Accuracy:0.7630500431406385
+
+ Epoch 47 / 50 -> Training Loss 0.8846004498724598 || Accuracy:0.7392148403796376
+
+ Epoch 48 / 50 -> Training Loss 0.8493769736451138 || Accuracy:0.7237920621225195
+
+ Epoch 49 / 50 -> Training Loss 0.8660831288256758 || Accuracy:0.7367342536669542
