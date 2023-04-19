@@ -91,4 +91,4 @@ class Evaluator():
 
     def compute_metrics(self, preds):
         metrics = compute_metrics(self.data, preds)
-        return json.dumps(metrics, indent=2)
+        return metrics

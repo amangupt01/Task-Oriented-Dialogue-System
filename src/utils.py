@@ -7,8 +7,9 @@ class ArgumentParser:
         parser.add_argument('--train_path', type=str, default='data/train.jsonl')
         parser.add_argument('--dev_path', type=str, default='data/dev.jsonl')
         parser.add_argument('--test_path', type=str, default='data/sample_test.jsonl')
+        parser.add_argument('--mode', type=str, default='train')
         parser.add_argument('--output_path', type=str, default='outputfile.txt')
-        parser.add_argument('--model_path', type=str, default='cs1190444_cs1190673_model')
+        parser.add_argument('--model_path', type=str, default='models/cs1190444_cs1190673_model')
         parser.add_argument('--batch_size', type=int, default=32)
         parser.add_argument('--num_epochs', type=int, default=50)
         parser.add_argument('--model', type=str, default='gpt2')
@@ -16,6 +17,9 @@ class ArgumentParser:
         parser.add_argument('--split_ratio', type=float, default=0.8)
         parser.add_argument('--init_lr', type=float, default=1e-5)
         parser.add_argument('--warmup_steps', type=int, default=1000)
+        parser.add_argument('--optimizer', type=str, default='adamw')
+        parser.add_argument('--save_wandb', type=bool, default=False)
+        parser.add_argument('--scheduler', type=str, default='linear_warmup')
         self.parser = parser
 
     def parse_args(self):
