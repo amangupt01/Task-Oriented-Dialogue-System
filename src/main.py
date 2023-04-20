@@ -1,17 +1,25 @@
 
 from imports import *
 
-from dataloader import DataLoader
-from utils import ArgumentParser, get_intent_count, get_slot_key_count
+from dataloader import TODDataset
+from utils import *
+from evaluations import Evaluator
+from gpt2 import GPT2_TOD
+# from t5 import T5_TOD
 
 if __name__ == '__main__':
+    seed_everything(42)
     parser = ArgumentParser().parse_args()
     args = vars(parser)
-    # print(args)
-    # print(args['train_path'])
-    train_data = DataLoader(args['train_path'])
-    dev_data = DataLoader(args['dev_path'])
-    get_slot_key_count(train_data)
+    print(args)
 
+    if (args['mode'] == 'train'):
 
-    pass
+        if (args['model'].startswith('gpt2')):
+            model = GPT2_TOD(args)
+
+        model.train(args)
+
+    if (args['mode'] == 'test'):
+        pass
+        
