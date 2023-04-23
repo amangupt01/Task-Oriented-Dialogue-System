@@ -61,6 +61,11 @@ class GPT2_TOD():
             )
 
         model = GPT2LMHeadModel.from_pretrained('gpt2')
+        # for param in model.parameters():
+        #     param.requires_grad = False
+
+        # for param in model.transformer.h[-1].parameters():
+        #     param.requires_grad = True
         tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
         tokenizer.add_special_tokens({'pad_token': '<pad>', 
                                         'bos_token': '<bos>',
@@ -122,23 +127,24 @@ class GPT2_TOD():
             self.train_epoch(epoch)
             self.model.eval()
             predictions = []
-            outfile = open(args['output_path'], 'w')
-            with torch.no_grad():
-                for batch in self.dev_data:
-                    input_ids = batch['input_ids'].to(device)
-                    attention_mask = batch['attention_mask'].to(device)
-                    outputs = self.model.generate(input_ids, attention_mask=attention_mask, max_new_tokens=40, do_sample=True,top_p=0.95, num_return_sequences=1, pad_token_id=self.tokenizer.eos_token_id)
-                    outputs = self.tokenizer.batch_decode(outputs, skip_special_tokens=True)
-                    outputs = [x.split('<sep>')[1].strip() for x in outputs]
-                    predictions.extend(outputs)
-            outfile.write('\n'.join(predictions))
-            metrics = self.evaluator.compute_metrics(predictions)   
-            for k, v in metrics.items():
-                print(f"{k}: {v:.4f}", end=', ')
-            print()      
-            if (args['save_wandb']):
-                wandb.log(metrics)
-            if (metrics['accuracy'] > best_so_far):
-                best_so_far = metrics['accuracy']
-                torch.save(self.model.state_dict(), args['model_path'])
+            if ((epoch+1) % 10 == 0):
+                outfile = open("outfile_gpt2.txt", 'w')
+                with torch.no_grad():
+                    for batch in self.dev_data:
+                        input_ids = batch['input_ids'].to(device)
+                        attention_mask = batch['attention_mask'].to(device)
+                        outputs = self.model.generate(input_ids, attention_mask=attention_mask, max_new_tokens=40, do_sample=True,top_p=0.95, num_return_sequences=1, pad_token_id=self.tokenizer.eos_token_id)
+                        outputs = self.tokenizer.batch_decode(outputs, skip_special_tokens=True)
+                        outputs = [x.split('<sep>')[1].strip() for x in outputs]
+                        predictions.extend(outputs)
+                metrics = self.evaluator.compute_metrics(predictions)   
+                for k, v in metrics.items():
+                    print(f"{k}: {v:.4f}", end=', ')
+                print()      
+                if (args['save_wandb']):
+                    wandb.log(metrics)
+                if (metrics['accuracy'] > best_so_far):
+                    best_so_far = metrics['accuracy']
+                    torch.save(self.model.state_dict(), args['model_path'])
+                    outfile.write('\n'.join(predictions))
         

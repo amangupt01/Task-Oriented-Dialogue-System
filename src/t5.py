@@ -16,7 +16,6 @@ class T5_Dataset(Dataset):
                 for obj in reader:
                     input_raw = self.get_input(obj) if not aux_input else self.get_aux_input(obj)
                     output_raw = self.get_output(obj) if not val else ''
-                    # text = "<bos> " + input_raw.strip() + " <sep> " + output_raw.strip() + " <eos>"
                     input_txt = "parse: " + input_raw.strip()
                     encoded_input = tokenizer(input_txt, return_tensors='pt', return_attention_mask=True)
                     self.input_ids.append(encoded_input['input_ids'][0])
@@ -39,12 +38,24 @@ class T5_Dataset(Dataset):
 
     def get_aux_input(self, obj):
         input_str = obj['input']
-        history_str = ' '.join([x['user_query'] + ' ' + x['response_text'] for x in obj['history']])
-        user_lists_str = ' '.join([l['name'] + ' ' + ' '.join(l['items']) for l in obj['user_lists']])
-        user_notes_str = ' '.join([n['name'] + ' ' + n['content'] for n in obj['user_notes']])
-        user_contacts_str = ' '.join(obj['user_contacts'])
-        # return input_str + ' <history> ' + history_str.strip() + ' <user_list> ' + user_lists_str.strip() + ' <user_notes> ' + user_notes_str.strip() + ' <user_contacts> ' + user_contacts_str.strip()
-        return input_str + ' <user_contacts> ' +  user_contacts_str.strip()
+        try:
+            history_str = ' '.join([x['user_query'] + ' ' + x['response_text'] for x in obj['history']])
+        except:
+            history_str = ''
+        try:
+            user_lists_str = ' '.join([l['name'] + ' ' + ' '.join(l['items']) for l in obj['user_lists']])
+        except:
+            user_lists_str = ''
+        try:
+            user_notes_str = ' '.join([n['name'] + ' ' + n['content'] for n in obj['user_notes']])
+        except:
+            user_notes_str = ''
+        try:
+            user_contacts_str = ' '.join(obj['user_contacts'])
+        except:
+            user_contacts_str = ''
+        return input_str + ' <user_contacts> ' + user_contacts_str.strip() + ' <history> ' + history_str.strip() + ' <user_list> ' + user_lists_str.strip() + ' <user_notes> ' + user_notes_str.strip()
+        # return input_str + ' <user_contacts> ' +  user_contacts_str.strip()
     def get_output(self, obj):
         output_str = obj['output']
         return output_str
@@ -56,23 +67,17 @@ class T5_TOD():
         if (args['save_wandb']):
             wandb.login()
             wandb.init(
-                project="task-oriented-dialogue-system-t5",
-
-                config={
-                    "init_lr": args['init_lr'],
-                    "batch_size": args['batch_size'],
-                    "optimizer": args['optimizer'],
-                    "num_epochs": args['num_epochs'],
-                    "warmup_steps": args['warmup_steps']
-                }
+                project="task-oriented-dialogue-system",
+                config=args
             )
 
-        model = T5ForConditionalGeneration.from_pretrained('t5-small')
-        tokenizer = T5Tokenizer.from_pretrained('t5-small')
+        model = T5ForConditionalGeneration.from_pretrained(args['model'])
+        tokenizer = T5Tokenizer.from_pretrained(args['model'])
         self.model = model.to(device)
         self.tokenizer = tokenizer
-        self.train_dataset = T5_Dataset([args['train_path']], tokenizer, aux_input=False)
-        self.dev_dataset = T5_Dataset([args['dev_path']], tokenizer, val=True, aux_input=False)
+        print("Loading dataset...")
+        self.train_dataset = T5_Dataset([args['train_path']], tokenizer, aux_input=args['aux_input'])
+        self.dev_dataset = T5_Dataset([args['dev_path']], tokenizer, val=True, aux_input=args['aux_input'])
     
         self.create_dataloaders(args)
 
@@ -80,9 +85,9 @@ class T5_TOD():
             self.optimizer = torch.optim.AdamW(model.parameters(), lr=args['init_lr'], weight_decay=0.01)
         if (args['scheduler'] == 'linear_warmup'):
             num_training_steps = args['num_epochs'] * len(self.train_data)
-            num_warmup_steps = int(0.1 * num_training_steps)
+            num_warmup_steps = int(args['warmup_steps'] * num_training_steps)
             self.scheduler = get_linear_schedule_with_warmup(self.optimizer, num_warmup_steps=num_warmup_steps, num_training_steps=num_training_steps)
-       
+          
         self.evaluator = Evaluator(args['dev_path'])
 
     def create_dataloaders(self, args):
@@ -120,6 +125,7 @@ class T5_TOD():
                 pbar.set_description(f"Epoch: {epoch+1}")
                 pbar.update(1)
             print(f"Training loss: {running_loss / num_batches:.4f}")
+            pbar.close()
 
     def train(self, args):
         print("Training started ...")
@@ -128,23 +134,21 @@ class T5_TOD():
             self.train_epoch(epoch)
             self.model.eval()
             predictions = []
-            outfile = open(args['output_path'], 'w')
-            with torch.no_grad():
-                for batch in self.dev_data:
-                    input_ids = batch['input_ids'].to(device)
-                    attention_mask = batch['input_attention_mask'].to(device)
-                    outputs = self.model.generate(input_ids, attention_mask=attention_mask, max_new_tokens=40, do_sample=True,top_p=0.95, num_return_sequences=1, pad_token_id=self.tokenizer.eos_token_id)
-                    outputs = self.tokenizer.batch_decode(outputs, skip_special_tokens=True)
-                    predictions.extend(outputs)
-            outfile.write('\n'.join(predictions))
-            metrics = self.evaluator.compute_metrics(predictions)   
-            for k, v in metrics.items():
-                print(f"{k}: {v:.4f}", end=', ')
-            print()      
-            if (args['save_wandb']):
-                wandb.log(metrics)
-            if (metrics['accuracy'] > best_so_far):
-                best_so_far = metrics['accuracy']
-                torch.save(self.model.state_dict(), args['model_path'])
-                outfile.write('\n'.join(predictions))
-        
+            if ((epoch+1)%10 == 0):
+                outfile = open(args['output_path'], 'w')
+                with torch.no_grad():
+                    for batch in self.dev_data:
+                        input_ids = batch['input_ids'].to(device)
+                        attention_mask = batch['input_attention_mask'].to(device)
+                        outputs = self.model.generate(input_ids, attention_mask=attention_mask, max_new_tokens=100, do_sample=True, top_p=0.95, num_return_sequences=1, pad_token_id=self.tokenizer.eos_token_id)
+                        outputs = self.tokenizer.batch_decode(outputs, skip_special_tokens=True)
+                        predictions.extend(outputs)
+                metrics = self.evaluator.compute_metrics(predictions)   
+                for k, v in metrics.items():
+                    print(f"{k}: {v:.4f}", end=', ')
+                print()      
+                if (args['save_wandb']):
+                    wandb.log(metrics)
+                if (metrics['accuracy'] > best_so_far):
+                    best_so_far = metrics['accuracy']
+                    outfile.write('\n'.join(predictions))
