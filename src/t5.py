@@ -12,8 +12,9 @@ class T5_Dataset(Dataset):
         self.output_attention_masks = []
         for data_path in data_paths:
             print('Loading data from {}'.format(data_path))
-            with jsonlines.open(data_path) as reader:
-                for obj in reader:
+            with open(data_path, 'r', encoding='utf-8') as fp:
+                for line in fp:
+                    obj = json.loads(line.strip())
                     input_raw = self.get_input(obj) if not aux_input else self.get_aux_input(obj)
                     output_raw = self.get_output(obj) if not val else ''
                     input_txt = "parse: " + input_raw.strip()
@@ -78,7 +79,7 @@ class T5_TOD():
         print("Loading dataset...")
         self.train_dataset = T5_Dataset([args['train_path']], tokenizer, aux_input=args['aux_input'])
         self.dev_dataset = T5_Dataset([args['dev_path']], tokenizer, val=True, aux_input=args['aux_input'])
-    
+        self.args = args
         self.create_dataloaders(args)
 
         if args['optimizer'] == 'adamw':
@@ -108,9 +109,10 @@ class T5_TOD():
         self.model.train()
         num_batches = len(self.train_data)
         running_loss = 0
+        self.optimizer.zero_grad()
+        j = 0
         with tqdm(total=num_batches, desc="Training", unit="batch", leave=False) as pbar:
             for _, batch in enumerate(self.train_data):
-                self.optimizer.zero_grad()
                 input_ids = batch['input_ids'].to(device)
                 input_attention_mask = batch['input_attention_mask'].to(device)
                 output_ids = batch['output_ids'].to(device)
@@ -119,11 +121,19 @@ class T5_TOD():
                 outputs = self.model(input_ids, attention_mask = input_attention_mask, labels=output_ids)
                 loss = outputs[0]
                 running_loss += loss.item()
+                loss = loss / self.args['grad_accum_steps']
                 loss.backward()
-                self.optimizer.step()
-                self.scheduler.step()
+                j+=1
+                if (j % self.args['grad_accum_steps'] == 0):
+                    self.optimizer.step()
+                    self.scheduler.step()
+                    self.optimizer.zero_grad()
                 pbar.set_description(f"Epoch: {epoch+1}")
                 pbar.update(1)
+            if (j % self.args['grad_accum_steps'] == 0):
+                    self.optimizer.step()
+                    self.scheduler.step()
+                    self.optimizer.zero_grad()
             print(f"Training loss: {running_loss / num_batches:.4f}")
             pbar.close()
 
@@ -134,7 +144,7 @@ class T5_TOD():
             self.train_epoch(epoch)
             self.model.eval()
             predictions = []
-            if ((epoch+1)%10 == 0):
+            if ((epoch+1)%args['eval_after'] == 0):
                 outfile = open(args['output_path'], 'w')
                 with torch.no_grad():
                     for batch in self.dev_data:
