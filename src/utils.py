@@ -1,5 +1,4 @@
 from imports import *
-from dataloader import DataLoader
 
 class ArgumentParser:
     def __init__(self):
@@ -11,20 +10,27 @@ class ArgumentParser:
         parser.add_argument('--output_path', type=str, default='outputfile.txt')
         parser.add_argument('--model_path', type=str, default='models/cs1190444_cs1190673_model')
         parser.add_argument('--batch_size', type=int, default=32)
-        parser.add_argument('--num_epochs', type=int, default=50)
-        parser.add_argument('--model', type=str, default='gpt2')
-        parser.add_argument('--use_random_split', type=bool, default=False)
-        parser.add_argument('--split_ratio', type=float, default=0.8)
-        parser.add_argument('--init_lr', type=float, default=1e-5)
-        parser.add_argument('--warmup_steps', type=int, default=1000)
+        parser.add_argument('--num_epochs', type=int, default=1)
+        parser.add_argument('--model', type=str, default='t5-small')
+        parser.add_argument('--init_lr', type=float, default=3e-4)
+        parser.add_argument('--warmup_steps', type=float, default=0.1, help='Proportion of training to perform linear learning rate warmup for. E.g., 0.1 = 10%% of training.')
         parser.add_argument('--optimizer', type=str, default='adamw')
         parser.add_argument('--save_wandb', type=bool, default=False)
         parser.add_argument('--scheduler', type=str, default='linear_warmup')
+        parser.add_argument('--aux_input', type=bool, default=True)
+        parser.add_argument('--eval_after', type=int, default=1000)
+
         self.parser = parser
 
     def parse_args(self):
         return self.parser.parse_args()
     
+def collate_fn(batch, tokenizer):
+    input_ids = torch.nn.utils.rnn.pad_sequence([x['input_ids'] for x in batch], batch_first=True, padding_value=tokenizer.pad_token_id)
+    attention_mask = torch.nn.utils.rnn.pad_sequence([x['input_attention_mask'] for x in batch], batch_first=True, padding_value=0)
+    output_ids = torch.nn.utils.rnn.pad_sequence([x['output_ids'] for x in batch], batch_first=True, padding_value=tokenizer.pad_token_id)
+    output_attention_mask = torch.nn.utils.rnn.pad_sequence([x['output_attention_mask'] for x in batch], batch_first=True, padding_value=0)
+    return {'input_ids': input_ids, 'input_attention_mask': attention_mask, 'output_ids': output_ids, 'output_attention_mask': output_attention_mask}
 
 def parse_input(data, tokenizer, model):
     outputs = []

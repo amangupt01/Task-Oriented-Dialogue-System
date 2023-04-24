@@ -1,6 +1,7 @@
 train:
 	bash run_model.sh train data/train.jsonl data/dev.jsonl
 
-test:
-	bash run_model.sh test data/test.jsonl outputfile.txt
+tests:
+	echo "hello"
+	bash run_model.sh test data/sample_test.jsonl outputfile.txt
 	
